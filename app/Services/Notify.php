@@ -4,7 +4,7 @@ namespace  App\Services;
 
 class Notify
 {
-    //Created Notifivation
+    //Created Notification
     static function createdNotification()
     {
         return notyf()->addSuccess('Created Successfully ⚡️', 'Success!');

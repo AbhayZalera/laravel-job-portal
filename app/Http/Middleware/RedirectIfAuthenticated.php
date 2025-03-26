@@ -20,19 +20,27 @@ class RedirectIfAuthenticated
         $guards = empty($guards) ? [null] : $guards;
         // dd($guards);
         foreach ($guards as $guard) {
+
             if (Auth::guard($guard)->check()) {
                 //This guard is admin
                 if ($guard === 'admin') {
+                    // dd($guard);
                     return redirect(RouteServiceProvider::ADMIN_DASHBOARD);
                 }
                 //This guard is web
                 else if ($request->user()->role === 'company') {
+                    // dd($request->user()->role);
                     return redirect(RouteServiceProvider::COMPANY_DASHBOARD);
                 } else if ($request->user()->role === 'candidate') {
+                    // dd($request->user()->role);
                     return redirect(RouteServiceProvider::CANDIDATE_DASHBOARD);
                 }
             }
+            // else {
+            //     dd('Jay Mataji');
+            // }
         }
+        // dd($next($request));
         return $next($request);
     }
 }

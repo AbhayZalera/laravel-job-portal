@@ -79,7 +79,6 @@ Route::group(['middleware' => ['auth:admin'], 'prefix' => 'admin', 'as' => 'admi
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 
-
     /** Profile update routes */
     Route::get('profile', [ProfileUpdateController::class, 'index'])->name('profile.index');
     Route::post('profile', [ProfileUpdateController::class, 'update'])->name('profile.update');

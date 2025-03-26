@@ -12,8 +12,7 @@
             @endforeach
             <div class="col-12">
                 <div class="card-body">
-                    <form id="job-form"
-                        action="{{ isset($job) ? route('admin.jobs.update', $job->id) : route('admin.jobs.store') }}"
+                    <form action="{{ isset($job) ? route('admin.jobs.update', $job->id) : route('admin.jobs.store') }}"
                         method="POST">
                         @csrf
                         @if (isset($job))
@@ -554,44 +553,6 @@
                     $('.city').html(html);
                 },
                 error: function(xhr, status, error) {}
-            });
-        });
-
-        //Store and Update
-
-        $('#job-form').on('submit', function(e) {
-            e.preventDefault();
-
-            let form = $(this);
-            let url = form.attr('action');
-            let method = form.attr('method');
-            let formData = new FormData(form[0]);
-
-            $.ajax({
-                url: url,
-                method: method,
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-
-                    if (response) {
-                        swal('Success!', response.message, 'success').then(() => {
-                            // window.location.href =
-                            //     "{{ route('admin.jobs.index') }}";
-                        });
-                    } else {
-                        swal('Error!', response.message, 'error');
-                    }
-                },
-                error: function(xhr) {
-                    let errors = xhr.responseJSON.errors;
-                    let errorMessages = '';
-                    $.each(errors, function(key, value) {
-                        errorMessages += value[0] + '<br>';
-                    });
-                    swal('Error!', errorMessages, 'error');
-                }
             });
         });
     </script>

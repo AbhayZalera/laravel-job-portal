@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ContryUpdateRequest;
+use App\Http\Requests\CountryCreateRequest;
 use App\Models\Country;
 use App\Services\Notify;
 use App\Traits\Searchable;
@@ -47,19 +49,11 @@ class CountryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(CountryCreateRequest $request): RedirectResponse
     {
-        //
-        $request->validate([
-            'name' => ['required', 'max:255', 'unique:industry_types,name']
-        ]); // validation
-
-        $type = new Country();
-        $type->name = $request->name;
-        $type->save();
+        $country = Country::create($request->all());
 
         Notify::createdNotification();
-
 
         return to_route('admin.countries.index');
     }
@@ -70,7 +64,6 @@ class CountryController extends Controller
      */
     public function edit(string $id): View
     {
-        //
         $countries = Country::findOrFail($id);
         return view('admin.Location.Country.create', compact('countries'));
     }
@@ -78,17 +71,15 @@ class CountryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id): RedirectResponse
+    public function update(ContryUpdateRequest $request, string $id): RedirectResponse
     {
-        //
-        // dd($request->all());
-        $request->validate([
-            'name' => ['required', 'max:255', 'unique:industry_types,name,' . $id]
-        ]); // validation
 
-        $type = Country::findOrFail($id);
-        $type->name = $request->name;
-        $type->save();
+        $country = Country::findOrFail($id);
+        $country->update($request->all());
+        // $country->update($request->all());
+        // $type->name = $request->name;
+        // $type->save();
+
 
         Notify::updatedNotification();
 

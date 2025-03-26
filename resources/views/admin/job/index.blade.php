@@ -23,23 +23,22 @@
                                 </div>
                             </form>
                         </div>
-                        <a id="create-job" href="{{ route('admin.jobs.create') }}" class="btn btn-primary"> <i
+                        <a href="{{ route('admin.jobs.create') }}" class="btn btn-primary"> <i
                                 class="fas fa-plus-circle"></i> Create new</a>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table id="myTable" class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Job</th>
-                                        <th>Category/Role</th>
-                                        <th>Salary</th>
-                                        <th>Deadline</th>
-                                        <th>Status</th>
-                                        <th>Approve</th>
-                                        <th style="width: 10%">Action</th>
-                                    </tr>
-                                </thead>
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Job</th>
+                                    <th>Category/Role</th>
+                                    <th>Salary</th>
+                                    <th>Deadline</th>
+                                    <th>Status</th>
+                                    <th>Approve</th>
+
+                                    <th style="width: 10%">Action</th>
+                                </tr>
                                 <tbody>
                                     @forelse ($jobs as $job)
                                         <tr>
@@ -78,7 +77,7 @@
                                             <td>{{ formatDate($job->deadline) }}</td>
                                             <td>
                                                 @if ($job->status === 'pending')
-                                                    <span class="badge bg-warning text-dark">Pending</span>
+                                                    <span class="badge bg-warning text-dark">Pendidng</span>
                                                 @elseif($job->deadline > date('Y-m-d'))
                                                     <span class="badge bg-primary text-dark">Active</span>
                                                 @else
@@ -89,7 +88,7 @@
                                                 <div class="form-group">
                                                     <label class="custom-switch mt-2">
                                                         <input @checked($job->status === 'active') @disabled($job->deadline < date('Y-m-d'))
-                                                            type="checkbox" data-id="{{ $job->id }} "
+                                                            type="checkbox" data-id="{{ $job->id }}"
                                                             name="custom-switch-checkbox"
                                                             class="custom-switch-input post_status">
                                                         <span class="custom-switch-indicator"></span>
@@ -106,20 +105,22 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="text-center">No result found!</td>
+                                            <td colspan="3" class="text-center">No result found!</td>
                                         </tr>
                                     @endforelse
+
                                 </tbody>
+
                             </table>
                         </div>
                     </div>
-                    {{-- <div class="card-footer text-right">
+                    <div class="card-footer text-right">
                         <nav class="d-inline-block">
                             @if ($jobs->hasPages())
                                 {{ $jobs->withQueryString()->links() }}
                             @endif
                         </nav>
-                    </div> --}}
+                    </div>
                 </div>
             </div>
         </div>
@@ -128,20 +129,11 @@
 
 @push('script')
     <script>
-        // Initialize DataTable
         $(document).ready(function() {
-            let table = new DataTable('#myTable', {
-                paging: true,
-                searching: true,
-                ordering: true,
-                info: true,
-                autoWidth: false,
-                responsive: true,
-            });
-
-            // Handle post status change
             $('.post_status').on('change', function() {
+                // alert('fbrufvugrfr');
                 let id = $(this).data('id');
+                // alert(id);
 
                 $.ajax({
                     method: 'POST',
@@ -151,14 +143,12 @@
                     },
                     success: function(response) {
                         if (response.message == 'success') {
-                            table.ajax.reload();
+                            window.location.reload();
                         }
                     },
-                    error: function(xhr, status, error) {
-                        console.log(xhr.responseText);
-                    }
+                    error: function(xhr, status, error) {}
                 });
-            });
-        });
+            })
+        })
     </script>
 @endpush

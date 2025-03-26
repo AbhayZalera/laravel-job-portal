@@ -84,6 +84,7 @@ namespace App\Models{
  * @property int $id
  * @property int $job_id
  * @property int $candidate_id
+ * @property string|null $a_status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Candidate|null $candidate
@@ -91,6 +92,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|AppliedJob newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|AppliedJob newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|AppliedJob query()
+ * @method static \Illuminate\Database\Eloquent\Builder|AppliedJob whereAStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|AppliedJob whereCandidateId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|AppliedJob whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|AppliedJob whereId($value)

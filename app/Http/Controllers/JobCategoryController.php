@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\JobCategoryCreateRequest;
+use App\Http\Requests\JobCategoryUpdateRequest;
 use App\Models\Job;
 use App\Models\JobCategory;
 use App\Services\Notify;
@@ -44,16 +46,9 @@ class JobCategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, JobCategory $jobCategory): RedirectResponse
+    public function store(JobCategoryCreateRequest $request, JobCategory $jobCategory): RedirectResponse
     {
         // dd($request->all());
-        $request->validate([
-            'icon' => ['required', 'max:255'],
-            'name' => ['required', 'max:255'],
-            'show_at_popular' => ['required'],
-            'show_at_featured' => ['required'],
-        ]);
-
         JobCategory::create(
             [
                 'icon' => $request->icon,
@@ -77,16 +72,9 @@ class JobCategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(JobCategoryUpdateRequest $request, string $id)
     {
         // dd($request->all());
-        $request->validate([
-            'icon' => ['nullable', 'max:255'],
-            'name' => ['required', 'max:255'],
-            'show_at_popular' => ['required'],
-            'show_at_featured' => ['required'],
-        ]);
-
         $category = JobCategory::findOrFail($id);
         $icon = $request->filled('icon') ? $request->icon : $category->icon;
         $category->update(

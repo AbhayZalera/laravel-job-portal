@@ -83,7 +83,7 @@ class JobController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(JobCreateRequest $request, Job $job)
+    public function store(JobCreateRequest $request, Job $job): RedirectResponse
     {
         // dd($request->all());
         $job = Job::create([
@@ -142,10 +142,9 @@ class JobController extends Controller
                 'skill_id' => $skill,
             ]);
         }
+        Notify::createdNotification();
 
-        return response()->json([
-            'message' => 'Job created successfully!',
-        ]);
+        return redirect()->route('admin.jobs.index');
     }
 
     /**
@@ -193,7 +192,7 @@ class JobController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(JobCreateRequest $request, string $id)
+    public function update(JobCreateRequest $request, string $id): RedirectResponse
     {
         $job = Job::findOrFail($id);
 
@@ -254,7 +253,9 @@ class JobController extends Controller
         foreach ($request->skills as $skill) {
             JobSkills::create(['job_id' => $job->id, 'skill_id' => $skill]);
         }
-        return response(['message' => ' Job update successfully !!'], 200);
+
+        Notify::updatedNotification();
+        return redirect()->route('admin.jobs.index');
     }
 
 

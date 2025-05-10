@@ -24,7 +24,6 @@ use App\Http\Controllers\Frontend\NewsletterController;
 use App\Http\Controllers\Frontend\PricingPageController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -172,6 +171,11 @@ Route::group(
         //RazorPay
         Route::get('razorpay-redirect', [PaymentController::class, 'razorpayRedirect'])->name('razorpay-redirect');
         Route::post('razorpay/payment', [PaymentController::class, 'payWithRazorpay'])->name('razorpay.payment');
+
+        //PhonePay
+        // Frontend routes
+        Route::get('payment/phonepe', [PaymentController::class, 'payWithPhonepe'])->name('phonepe.payment');
+        Route::post('payment/phonepe/callback', [PaymentController::class, 'phonepeCallback'])->name('phonepe.callback');
 
         //Jobs
         Route::resource('jobs', jobController::class);

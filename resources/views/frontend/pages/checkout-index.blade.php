@@ -50,6 +50,14 @@
                                                 src="{{ asset('default-uploads/razorpay.png') }}" alt=""></a>
                                     </div>
                                 @endif
+
+                                {{-- @if (config('gatewaySettings.phonepe_status') === 'active') --}}
+                                <div class="col-md-3">
+                                    <a href="{{ route('company.phonepe.payment') }}"><img class=""
+                                            style="width: 200px;border-radius: 5px;border: 3px solid #1ca774; height:110px;object-fit:contain;"
+                                            src="{{ asset('default-uploads/phonepe.png') }}" alt="PhonePe"></a>
+                                </div>
+                                {{-- @endif --}}
                             </div>
                         </div>
 

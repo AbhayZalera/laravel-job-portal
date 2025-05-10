@@ -50,8 +50,6 @@ use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\WhyChooseUsController;
 use App\Http\Controllers\EducationController;
 use App\Http\Controllers\JobCategoryController;
-use App\Models\JobExperience;
-use App\Models\WhyChooseUs;
 use Illuminate\Support\Facades\Route;
 
 
@@ -154,6 +152,11 @@ Route::group(['middleware' => ['auth:admin'], 'prefix' => 'admin', 'as' => 'admi
     Route::post('paypal-settings', [PaymentSettingController::class, 'updatePaypalSetting'])->name('paypal-settings.update');
     Route::post('stripe-settings', [PaymentSettingController::class, 'updateStripeSetting'])->name('stripe-settings.update');
     Route::post('razorpay-settings', [PaymentSettingController::class, 'updateRazorpaySetting'])->name('razorpay-settings.update');
+
+    //PhonePay
+    // Admin routes
+    Route::post('phonepe-settings/update', [PaymentSettingController::class, 'updatePhonepeSetting'])
+        ->name('phonepe-settings.update');
 
     //Site Settings Route
     Route::get('site-settings', [SiteSettingController::class, 'index'])->name('site-settings.index');

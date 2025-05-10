@@ -17203,6 +17203,25 @@ namespace Illuminate\Support\Facades {
             }
     }
 
+namespace Ixudra\Curl\Facades {
+            /**
+     * 
+     *
+     */        class Curl {
+                    /**
+         * 
+         *
+         * @param $url string   The URL to which the request is to be sent
+         * @return \Ixudra\Curl\Builder 
+         * @static 
+         */        public static function to($url)
+        {
+                        /** @var \Ixudra\Curl\CurlService $instance */
+                        return $instance->to($url);
+        }
+            }
+    }
+
 namespace Barryvdh\Debugbar\Facades {
             /**
      * 
@@ -22872,6 +22891,7 @@ namespace  {
             class Validator extends \Illuminate\Support\Facades\Validator {}
             class View extends \Illuminate\Support\Facades\View {}
             class Vite extends \Illuminate\Support\Facades\Vite {}
+            class Curl extends \Ixudra\Curl\Facades\Curl {}
             class Debugbar extends \Barryvdh\Debugbar\Facades\Debugbar {}
             class PDF extends \Barryvdh\DomPDF\Facade\Pdf {}
             class Pdf extends \Barryvdh\DomPDF\Facade\Pdf {}

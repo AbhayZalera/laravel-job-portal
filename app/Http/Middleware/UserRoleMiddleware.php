@@ -15,6 +15,7 @@ class UserRoleMiddleware
      */
     public function handle(Request $request, Closure $next, $role): Response
     {
+        // dd($request->all());
         // dd($request->user()->role);
         if ($request->user()->role !== $role) {
             if ($request->user()->role === 'company') {

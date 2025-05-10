@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\Notify;
 use App\Services\OrderService;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 use phpDocumentor\Reflection\Types\Boolean;
 use Session;
@@ -15,6 +18,9 @@ use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
 use Razorpay\Api\Api as RazorpayApi;
 use Redirect;
+use Str;
+use Illuminate\Support\Facades\Log;
+use Ixudra\Curl\Facades\Curl;
 
 class PaymentController extends Controller
 {
@@ -299,5 +305,270 @@ class PaymentController extends Controller
             return true;
         }
         return false;
+    }
+
+    // PhonePe
+    // public function payWithPhonepe()
+    // {
+    //     try {
+    //         abort_if(!$this->checkSession(), 404);
+
+    //         if (!isCompanyProfileComplete()) {
+    //             Notify::errorNotification('Complete your profile first!');
+    //             return back();
+    //         }
+
+    //         $amount = Session::get('selected_plan')['price'] * config('gatewaySettings.phonepe_currency_rate');
+    //         $merchantId = config('gatewaySettings.phonepe_merchant_id');
+    //         $saltKey = config('gatewaySettings.phonepe_salt_key');
+    //         $saltIndex = config('gatewaySettings.phonepe_salt_index');
+
+    //         if (empty($merchantId) || empty($saltKey)) {
+    //             throw new \Exception('PhonePe credentials not configured');
+    //         }
+
+    //         $data = [
+    //             "merchantId" => $merchantId,
+    //             "merchantTransactionId" => "MT" . Str::uuid()->toString(),
+    //             "merchantUserId" => "USER_" . auth()->id(),
+    //             "amount" => $amount * 100, // Convert to paise
+    //             "redirectUrl" => route('company.phonepe.callback', [], true),
+    //             "redirectMode" => "POST",
+    //             "callbackUrl" => route('company.phonepe.callback', [], true),
+    //             "mobileNumber" => preg_replace('/[^0-9]/', '', auth()->user()->phone),
+    //             "paymentInstrument" => ["type" => "PAY_PAGE"]
+    //         ];
+
+    //         // $base64Payload = base64_encode(json_encode($data));
+    //         // $endpoint = '/pg/v1/pay';
+    //         // $hashString = $base64Payload . $endpoint . $saltKey;
+    //         // $sha256 = hash('sha256', $hashString);
+    //         // $xVerifyHeader = $sha256 . '###' . $saltIndex;
+
+    //         // 2. Convert to JSON and base64
+    //         $jsonPayload = json_encode($data);
+    //         $base64Payload = base64_encode($jsonPayload);
+
+    //         // 3. Create the hash string (ORDER IS CRUCIAL!)
+    //         $endpointPath = '/pg/v1/pay'; // Note the leading slash
+    //         $hashString = $base64Payload . $endpointPath . $saltKey;
+
+    //         // 4. Generate SHA256 hash
+    //         $sha256Hash = hash('sha256', $hashString);
+
+    //         // 5. Combine with salt index
+    //         $xVerifyHeader = $sha256Hash . '###' . $saltIndex;
+
+    //         $baseUrl = config('gatewaySettings.phonepe_mode') === 'sandbox'
+    //             ? 'https://api-preprod.phonepe.com/apis/merchant-sandbox'
+    //             : 'https://api.phonepe.com/apis/hermes';
+    //         // dd($xVerifyHeader);
+    //         $response = Http::withHeaders([
+    //             'Content-Type' => 'application/json',
+    //             'X-VERIFY' => $xVerifyHeader,
+    //             'X-MERCHANT-ID' => $merchantId
+    //         ])->post($baseUrl . $endpointPath, [
+    //             'request' => $base64Payload
+    //         ]);
+    //         dd($response);
+    //         if ($response->successful()) {
+    //             $responseData = $response->json();
+
+    //             if (($responseData['success'] ?? false) === true) {
+    //                 return redirect()->away(
+    //                     $responseData['data']['instrumentResponse']['redirectInfo']['url']
+    //                 );
+    //             }
+    //         }
+
+    //         Log::error('PhonePe API Error', [
+    //             'status' => $response->status(),
+    //             'body' => $response->body()
+    //         ]);
+
+    //         throw new \Exception('Payment initiation failed. Please try another method.');
+    //     } catch (\Exception $e) {
+    //         Log::error('PhonePe Payment Failed: ' . $e->getMessage());
+    //         return redirect()->route('company.payment.error')
+    //             ->withErrors(['error' => $e->getMessage()]);
+    //     }
+    // }
+
+    public function payWithPhonepe()
+    {
+        try {
+            abort_if(!$this->checkSession(), 404);
+
+            if (!isCompanyProfileComplete()) {
+                Notify::errorNotification('Complete your profile first!');
+                return back();
+            }
+
+            $amount = Session::get('selected_plan')['price'] * config('gatewaySettings.phonepe_currency_rate');
+            $merchantId = config('gatewaySettings.phonepe_merchant_id');
+            $saltKey = config('gatewaySettings.phonepe_salt_key');
+            $saltIndex = config('gatewaySettings.phonepe_salt_index');
+            // Enhanced credential validation
+            if (empty($merchantId) || empty($saltKey)) {
+                throw new \Exception('PhonePe credentials not configured');
+            }
+
+            // Prepare payload with strict typing
+            $data = [
+                "merchantId" => (string) $merchantId,
+                "merchantTransactionId" => "MT" . Str::uuid()->toString(),
+                "merchantUserId" => "USER_" . auth()->id(),
+                "amount" => (int) ($amount * 100), // Ensure integer value for paise
+                "redirectUrl" => route('company.phonepe.callback'),
+                "redirectMode" => "POST",
+                "callbackUrl" => route('company.phonepe.callback'),
+                "mobileNumber" => (string) preg_replace('/[^0-9]/', '', auth()->user()->company->phone),
+                "paymentInstrument" => [
+                    "type" => "PAY_PAGE" // Must be exactly "PAY_PAGE"
+                ]
+            ];
+
+            // Validate JSON payload before encoding
+            $jsonPayload = json_encode($data);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception('Invalid payload data: ' . json_last_error_msg());
+            }
+
+            $base64Payload = base64_encode($jsonPayload);
+            $endpoint = '/pg/v1/pay';
+
+            // Generate X-VERIFY header with verification
+            $xVerifyHeader = $this->generateXVerifyHeader($base64Payload, $endpoint, $saltKey, $saltIndex);
+
+            // Get base URL with validation
+            $baseUrl = config('gatewaySettings.phonepe_mode') === 'sandbox'
+                ? 'https://api-preprod.phonepe.com/apis/merchant-sandbox'
+                : 'https://api.phonepe.com/apis/hermes';
+
+            if (!filter_var($baseUrl, FILTER_VALIDATE_URL)) {
+                throw new \Exception('Invalid PhonePe API URL');
+            }
+
+            $fullUrl = $baseUrl . $endpoint;
+
+            // Make API request with timeout and retry
+            $response = Http::timeout(30)
+                ->retry(3, 500)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'X-VERIFY' => $xVerifyHeader,
+                    'X-MERCHANT-ID' => $merchantId
+                ])
+                ->post($fullUrl, [
+                    'request' => $base64Payload
+                ]);
+            dd($response);
+            // Enhanced response handling
+            if ($response->successful()) {
+                $responseData = $response->json();
+
+                if (($responseData['success'] ?? false) === true) {
+                    return redirect()->away(
+                        $responseData['data']['instrumentResponse']['redirectInfo']['url']
+                    );
+                }
+            }
+            // dd($response->status());
+
+            // Detailed error logging
+            $errorContext = [
+                'request' => [
+                    'url' => $fullUrl,
+                    'payload' => $data,
+                    'base64Payload' => $base64Payload,
+                    'headers' => [
+                        'X-VERIFY' => $xVerifyHeader,
+                        'X-MERCHANT-ID' => $merchantId
+                    ]
+                ],
+                'response' => [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'headers' => $response->headers()
+                ],
+                'environment' => [
+                    'mode' => config('gatewaySettings.phonepe_mode'),
+                    'merchant_id' => $merchantId,
+                    'salt_key' => substr($saltKey, 0, 4) . '...' . substr($saltKey, -4) // Partial for security
+                ]
+            ];
+
+            Log::error('PhonePe API Failure', $errorContext);
+
+            // Extract error message from response if available
+            $errorMessage = 'Payment initiation failed. Please try another method.';
+            $responseBody = $response->json();
+            if (isset($responseBody['message'])) {
+                $errorMessage .= ' Reason: ' . $responseBody['message'];
+            }
+
+            throw new \Exception($errorMessage);
+        } catch (\Exception $e) {
+            Log::error('PhonePe Payment Exception: ' . $e->getMessage());
+            return redirect()->route('company.payment.error')
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    protected function generateXVerifyHeader($base64Payload, $endpoint, $saltKey, $saltIndex)
+    {
+        // Verify endpoint starts with slash
+        if (strpos($endpoint, '/') !== 0) {
+            $endpoint = '/' . $endpoint;
+        }
+
+        $hashString = $base64Payload . $endpoint . $saltKey;
+        $sha256 = hash('sha256', $hashString);
+
+        // Verify hash generation
+        if (strlen($sha256) !== 64) {
+            throw new \Exception('Invalid hash generated');
+        }
+
+        return $sha256 . '###' . $saltIndex;
+    }
+
+    public function phonepeCallback(Request $request)
+    {
+        try {
+            abort_if(!$this->checkSession(), 404);
+
+            $callbackData = $request->all();
+            $receivedSignature = $request->header('X-VERIFY');
+            $saltKey = config('gatewaySettings.phonepe_salt_key');
+            $saltIndex = config('gatewaySettings.phonepe_salt_index');
+
+            $expectedSignature = hash('sha256', $callbackData['response'] . $saltKey) . '###' . $saltIndex;
+
+            if (!hash_equals($expectedSignature, $receivedSignature)) {
+                throw new \Exception('Invalid callback signature');
+            }
+
+            $responseData = json_decode(base64_decode($callbackData['response']), true);
+
+            if ($responseData['code'] === 'PAYMENT_SUCCESS') {
+                OrderService::storeOrder(
+                    $responseData['data']['merchantTransactionId'],
+                    'phonepe',
+                    $responseData['data']['amount'] / 100,
+                    'INR',
+                    'paid'
+                );
+
+                OrderService::setUserPlan();
+                return redirect()->route('company.payment.success');
+            }
+
+            throw new \Exception('Payment failed: ' . ($responseData['message'] ?? 'Unknown error'));
+        } catch (\Exception $e) {
+            Log::error('PhonePe Callback Error: ' . $e->getMessage());
+            return redirect()->route('company.payment.error')
+                ->withErrors(['error' => 'Payment verification failed.']);
+        }
     }
 }

@@ -76,8 +76,8 @@ class FrontendJobPageController extends Controller
     function show(string $slug): View
     {
         $job = Job::where('slug', $slug)->firstOrFail();
-        $openJobs = Job::where('company_id', $job->company->id)->where('status', 'active')->where('deadline', '>=', date('Y-m-d'))->count();
-        $alreadyApplied = AppliedJob::where(['job_id' => $job->id, 'candidate_id' => auth()->user()->candidate?->id])->exists();
+        $openJobs = Job::where('company_id', $job->company?->id)->where('status', 'active')->where('deadline', '>=', date('Y-m-d'))->count();
+        $alreadyApplied = AppliedJob::where(['job_id' => $job?->id, 'candidate_id' => auth()->user()?->candidate?->id])->exists();
         return view('frontend.pages.job-show', compact('job', 'openJobs', 'alreadyApplied'));
     }
 

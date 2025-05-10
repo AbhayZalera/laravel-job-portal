@@ -33,6 +33,11 @@
                                         <a class="nav-link" id="contact-tab4" data-toggle="tab" href="#contact4"
                                             role="tab" aria-controls="contact" aria-selected="false">RazorPay</a>
                                     </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="phonepe-tab4" data-toggle="tab" href="#phonepe4"
+                                            role="tab" aria-controls="phonepe" aria-selected="false">PhonePe</a>
+                                    </li>
                                 </ul>
                             </div>
                             <div class="col-12 col-sm-12 col-md-10">
@@ -56,6 +61,11 @@
                                         aria-labelledby="contact-tab4">
                                         {{-- RazorPay Settings --}}
                                         @include('admin.payment-setting.sections.razorpay-section')
+                                    </div>
+
+                                    <div class="tab-pane fade" id="phonepe4" role="tabpanel"
+                                        aria-labelledby="phonepe-tab4">
+                                        @include('admin.payment-setting.sections.phonepe-section')
                                     </div>
                                 </div>
                             </div>

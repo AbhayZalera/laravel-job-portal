@@ -21,14 +21,11 @@ class ApiCountryController extends Controller
         $country = $query->paginate(20);
         return $country;
     }
-
-
     /**
      * Store a newly created resource in storage.
      */
     public function store(CountryCreateRequest $request)
     {
-
         $country = Country::create($request->all());
         return $request->input();
     }

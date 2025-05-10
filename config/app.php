@@ -163,6 +163,7 @@ return [
         /*
          * Application Service Providers...
          */
+        Ixudra\Curl\CurlServiceProvider::class,
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
@@ -185,6 +186,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'Curl' => Ixudra\Curl\Facades\Curl::class,
     ])->toArray(),
 
 ];

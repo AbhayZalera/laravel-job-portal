@@ -153,6 +153,7 @@
                                     <div class="text-muted text-center">Already have an account?
                                         <a href="{{ route('login') }}">Sign in</a>
                                     </div>
+                                </div>
                         </form>
                         {{-- <div class="text-center mt-20">
                             <div class="divider-text-center"><span>Or continue with</span></div>

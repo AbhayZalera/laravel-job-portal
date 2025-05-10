@@ -70,6 +70,7 @@ Route::post('admin/forgot-password', [ApiAdminAuthController::class, 'forgotPass
 //http://laravel-job-portal.test/api/admin/reset-password
 Route::post('admin/reset-password', [ApiAdminAuthController::class, 'resetPassword']);
 //Admin
+
 Route::group(
     ['middleware' => ['auth:sanctum'], 'prefix' => 'admin', 'as' => 'admin.'],
     function () {
@@ -91,8 +92,6 @@ Route::group(
         //Store Job Post
         //http://laravel-job-portal.test/api/admin/jobs
         Route::resource('jobs', ApiJobController::class);
-
-
 
 
 
